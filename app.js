@@ -55,7 +55,6 @@ function renderDrawer(){
 /* ===== RENDER PRINCIPAL ===== */
 function render(){
 
-  /* BOTONES SEGÚN MODO */
   if(editMode){
     addItemBtn.style.display = "block";
     editBtn.textContent = "↩️ Volver";
@@ -69,15 +68,17 @@ function render(){
   const q = search.value.toLowerCase();
 
   list.innerHTML = items
-   .filter(i =>
-  q
-    ? i.name.toLowerCase().includes(q)
-    : i.cat === activeCat
-)
-
+    .filter(i =>
+      q
+        ? i.name.toLowerCase().includes(q)
+        : i.cat === activeCat
+    )
     .map((i, idx) => `
       <div class="item">
-        <span>${i.name}</span>
+        <div>
+          <strong>${i.name}</strong>
+          ${q ? `<div style="font-size:12px;opacity:.6">${i.cat}</div>` : ""}
+        </div>
         <div>
           ${
             editMode
@@ -107,8 +108,8 @@ function showAddItem(){
         ${categories.map(c => `<option>${c}</option>`).join("")}
       </select>
       <div>
-        <button id="save">Guardar</button>
-        <button id="cancel">Cancelar</button>
+        <button id="save" class="btn-green">Guardar</button>
+        <button id="cancel" class="btn-red">Cancelar</button>
       </div>
     </div>
   `;
@@ -151,8 +152,8 @@ function showQtyModal(name){
       </div>
 
       <div>
-        <button id="add">Añadir</button>
-        <button id="cancel">Cancelar</button>
+        <button id="add" class="btn-green">Añadir</button>
+        <button id="cancel" class="btn-red">Cancelar</button>
       </div>
     </div>
   `;
@@ -253,8 +254,8 @@ function previewWhatsApp(){
       <h3>Vista previa WhatsApp</h3>
       <textarea style="width:100%;height:200px">${buildWhatsAppText()}</textarea>
       <div>
-        <button id="cancel">Cancelar</button>
-        <button id="send">Enviar</button>
+        <button id="cancel" class="btn-red">Cancelar</button>
+        <button id="send" class="btn-green">Enviar</button>
       </div>
     </div>
   `;
