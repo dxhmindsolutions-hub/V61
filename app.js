@@ -5,6 +5,8 @@ const list          = document.getElementById("list");
 const ticketList    = document.getElementById("ticketList");
 const confirmModal  = document.getElementById("confirmModal");
 const confirmText   = document.getElementById("confirmText");
+const addItemBtn    = document.getElementById("addItemBtn");
+const editBtn       = document.getElementById("editBtn");
 
 /* ===== MODO EDICIÓN ===== */
 let editMode = false;
@@ -32,6 +34,7 @@ const categories = [
 let activeCat = categories[0];
 let items = JSON.parse(localStorage.items || "[]");
 let cart  = JSON.parse(localStorage.cart  || "[]");
+
 let deleteIndex = null;
 let deleteType  = null;
 
@@ -51,7 +54,18 @@ function renderDrawer(){
 
 /* ===== RENDER PRINCIPAL ===== */
 function render(){
+
+  /* BOTONES SEGÚN MODO */
+  if(editMode){
+    addItemBtn.style.display = "block";
+    editBtn.textContent = "↩️ Volver";
+  }else{
+    addItemBtn.style.display = "none";
+    editBtn.textContent = "✏️ Editar";
+  }
+
   renderDrawer();
+
   const q = search.value.toLowerCase();
 
   list.innerHTML = items
@@ -70,11 +84,12 @@ function render(){
     `).join("");
 
   renderTicket();
+
   localStorage.items = JSON.stringify(items);
   localStorage.cart  = JSON.stringify(cart);
 }
 
-/* ===== AÑADIR NUEVO ARTÍCULO ===== */
+/* ===== NUEVO ARTÍCULO ===== */
 function showAddItem(){
   const m = document.createElement("div");
   m.className = "modal";
@@ -106,7 +121,7 @@ function showAddItem(){
   };
 }
 
-/* ===== MODAL CANTIDAD + UNIDAD ===== */
+/* ===== MODAL CANTIDAD / UNIDAD ===== */
 function showQtyModal(name){
   let qty = 1;
   let unit = "UNIDAD";
@@ -120,9 +135,7 @@ function showQtyModal(name){
 
       <p>Cantidad</p>
       <div class="btns qty">
-        ${[1,2,3,4,5,6,7,8,9,10].map(n =>
-          `<button class="${n===1?'active':''}">${n}</button>`
-        ).join("")}
+        ${[1,2,3,4,5,6,7,8,9,10].map(n => `<button>${n}</button>`).join("")}
       </div>
 
       <p>Unidad</p>
@@ -140,19 +153,17 @@ function showQtyModal(name){
   `;
   document.body.appendChild(m);
 
-  /* Cantidad */
-  m.querySelectorAll(".qty button").forEach(b=>{
-    b.onclick = ()=>{
-      m.querySelectorAll(".qty button").forEach(x=>x.classList.remove("active"));
+  m.querySelectorAll(".qty button").forEach(b => {
+    b.onclick = () => {
+      m.querySelectorAll(".qty button").forEach(x => x.classList.remove("active"));
       b.classList.add("active");
       qty = +b.textContent;
     };
   });
 
-  /* Unidad */
-  m.querySelectorAll(".unit button").forEach(b=>{
-    b.onclick = ()=>{
-      m.querySelectorAll(".unit button").forEach(x=>x.classList.remove("active"));
+  m.querySelectorAll(".unit button").forEach(b => {
+    b.onclick = () => {
+      m.querySelectorAll(".unit button").forEach(x => x.classList.remove("active"));
       b.classList.add("active");
       unit = b.textContent;
     };
@@ -209,29 +220,6 @@ function resetTicket(){
   render();
 }
 
-/* ===== IMPRESIÓN ===== */
-function printTicket(){
-  const cont = document.getElementById("ticket-items");
-  cont.innerHTML = "";
-
-  cart.forEach(c => {
-    cont.innerHTML += `
-      <div class="ticket-line">
-        <span>${c.name}</span>
-        <span>${c.qty} ${c.unit}</span>
-      </div>
-    `;
-  });
-
-  document.getElementById("ticket-fecha").textContent =
-    new Date().toLocaleString();
-
-  document.getElementById("ticket-total").textContent =
-    cart.length;
-
-  window.print();
-}
-
 /* ===== WHATSAPP ===== */
 function buildWhatsAppText(){
   let txt = "🧾 *PEDIDO*\n\n";
@@ -251,17 +239,39 @@ function buildWhatsAppText(){
   return txt.trim();
 }
 
+function previewWhatsApp(){
+  const m = document.createElement("div");
+  m.className = "modal";
+  m.style.display = "flex";
+  m.innerHTML = `
+    <div class="box">
+      <h3>Vista previa WhatsApp</h3>
+      <textarea style="width:100%;height:200px">${buildWhatsAppText()}</textarea>
+      <div>
+        <button id="cancel">Cancelar</button>
+        <button id="send">Enviar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+
+  m.querySelector("#cancel").onclick = () => m.remove();
+  m.querySelector("#send").onclick = () => {
+    const txt = m.querySelector("textarea").value;
+    window.open("https://wa.me/?text=" + encodeURIComponent(txt));
+    m.remove();
+  };
+}
+
 function sendWhatsApp(){
-  window.open(
-    "https://wa.me/?text=" + encodeURIComponent(buildWhatsAppText())
-  );
+  previewWhatsApp();
 }
 
 /* ===== DATOS INICIALES ===== */
 if(items.length === 0){
   items = [
     { name: "Coca Cola", cat: "Aguas y refrescos" },
-    { name: "Manzana", cat: "Frutas y verduras" }
+    { name: "Manzana",  cat: "Frutas y verduras" }
   ];
 }
 
