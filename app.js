@@ -69,7 +69,12 @@ function render(){
   const q = search.value.toLowerCase();
 
   list.innerHTML = items
-    .filter(i => (!q || i.name.toLowerCase().includes(q)) && i.cat === activeCat)
+   .filter(i =>
+  q
+    ? i.name.toLowerCase().includes(q)
+    : i.cat === activeCat
+)
+
     .map((i, idx) => `
       <div class="item">
         <span>${i.name}</span>
